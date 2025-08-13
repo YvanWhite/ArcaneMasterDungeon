@@ -1,13 +1,23 @@
 // Copyright YvanWhite
 
 #include "Player/AuraPlayerController.h"
-#include "EnhancedInputSubsystems.h"
+
+#include "InputActionValue.h"
 #include "EnhancedInputComponent.h"
+#include "Interaction/EnemyInterface.h"
+#include "EnhancedInputSubsystems.h"
 
 
 AAuraPlayerController::AAuraPlayerController()
 {
 	bReplicates = true;
+}
+
+void AAuraPlayerController::PlayerTick(float DeltaTime)
+{
+	Super::PlayerTick(DeltaTime);
+	// 在这里可以添加每帧需要执行的逻辑
+	CursorTrace();
 }
 
 void AAuraPlayerController::BeginPlay()
@@ -35,9 +45,53 @@ void AAuraPlayerController::SetupInputComponent()
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
 
+	//将MoveAction变量暴露给蓝图类，并在此处绑定到Move函数
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AAuraPlayerController::Move);
 }
 
+//函数实现鼠标光标追踪，并判断实现了EnemyInterface的Actor的高亮情况
+void AAuraPlayerController::CursorTrace()
+{
+	FHitResult CursorHit;
+	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
+	if (!CursorHit.bBlockingHit) return;
+
+	LastActor = ThisActor;
+	ThisActor = Cast<IEnemyInterface>(CursorHit.GetActor());
+
+	if (LastActor == nullptr)
+	{
+		if (ThisActor != nullptr)
+		{
+			ThisActor->HighlightActor();
+		}
+		else
+		{
+			//Do nothing
+		}
+	}
+	else // LastActor != nullptr
+	{
+		if (ThisActor == nullptr)
+		{
+			LastActor->UnHighlightActor();
+		}
+		else
+		{
+			if(LastActor != ThisActor)
+			{
+				LastActor->UnHighlightActor();
+				ThisActor->HighlightActor();
+			}
+			else
+			{
+				//Do nothing
+			}
+		}
+	}
+}
+
+//函数实现移动功能
 void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 {
 	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();

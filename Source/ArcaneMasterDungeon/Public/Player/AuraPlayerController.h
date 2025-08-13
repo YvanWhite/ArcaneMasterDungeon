@@ -9,6 +9,7 @@
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
+class IEnemyInterface;
 
 /**
  * 
@@ -20,12 +21,15 @@ class ARCANEMASTERDUNGEON_API AAuraPlayerController : public APlayerController
 	
 public:
 	AAuraPlayerController();
+	virtual void PlayerTick(float DeltaTime) override;
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 
 private:
+	void CursorTrace();
+
 	UPROPERTY(EditAnywhere, Category="Input")
 	TObjectPtr<UInputMappingContext> AuraContext;
 
@@ -34,4 +38,6 @@ private:
 
 	void Move(const FInputActionValue& InputActionValue);
 
+	IEnemyInterface* LastActor;
+	IEnemyInterface* ThisActor;
 };
