@@ -17,9 +17,13 @@ class ARCANEMASTERDUNGEON_API AAuraEnemy : public AAuraCharacterBase, public IEn
 public:
 	AAuraEnemy();
 
-	virtual void HighlightActor() override;
 
+
+	/* IEnemyInterfaceº¯Êý */
+	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
 
+protected:
+	virtual void BeginPlay() override;
 
 };
